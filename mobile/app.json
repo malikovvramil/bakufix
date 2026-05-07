@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "BakıFix",
+    "slug": "bakufix",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "bakufix",
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Şəhər problemlərini foto ilə qeydə almaq üçün"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Problemin yerini avtomatik müəyyən etmək üçün"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png"
+        }
+      ],
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "android": {
+      "package": "az.bakufix.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "az.bakufix.app"
+    }
+  }
+}
