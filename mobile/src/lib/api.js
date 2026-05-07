@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = 'http://192.168.10.35/api'; // deployment-dan sonra dəyişdir
+const API_URL = 'https://bakufix.up.railway.app/api';
 
 const api = axios.create({ baseURL: API_URL, timeout: 15000 });
 

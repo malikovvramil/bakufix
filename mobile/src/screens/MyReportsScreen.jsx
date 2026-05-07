@@ -6,13 +6,13 @@ const STATUS_AZ    = { pending:'Gözləyir', in_progress:'İcrada', resolved:'H�
 const STATUS_COLOR = { pending:'#F59E0B', in_progress:'#3B82F6', resolved:'#10B981', rejected:'#EF4444' };
 const PRIORITY_AZ  = { low:'Aşağı', medium:'Orta', high:'Yüksək', critical:'Kritik' };
 
-export default function MyReportsScreen() {
+export default function MyReportsScreen({ admin = false }) {
   const [reports,   setReports]   = useState([]);
   const [refreshing,setRefreshing]= useState(false);
   const [selected,  setSelected]  = useState(null);
 
   const load = async () => {
-    try { const r = await api.get('/reports'); setReports(r.data.data); }
+    try { const r = await api.get('/reports?limit=100'); setReports(r.data.data); }
     catch { Alert.alert('Xəta', 'Müraciətlər yüklənmədi'); }
   };
 
@@ -21,6 +21,15 @@ export default function MyReportsScreen() {
   const rate = async (id, rating) => {
     try { await api.post(`/reports/${id}/rate`, { rating }); load(); Alert.alert('Təşəkkür!', 'Qiymətləndirməniz qeyd edildi'); }
     catch { Alert.alert('Xəta', 'Qiymətləndirmə mümkün deyil'); }
+  };
+
+  const changeStatus = async (id, status) => {
+    try {
+      await api.patch(`/reports/${id}/status`, { status });
+      load();
+      setSelected(null);
+      Alert.alert('✅', 'Status yeniləndi');
+    } catch { Alert.alert('Xəta', 'Status dəyişdirilmədi'); }
   };
 
   const renderItem = ({ item: r }) => (
@@ -38,22 +47,44 @@ export default function MyReportsScreen() {
 
       {selected?.id === r.id && (
         <View style={s.detail}>
-          <Text style={s.detailText}>📍 {r.address || `${r.latitude?.toFixed(4)}, ${r.longitude?.toFixed(4)}`}</Text>
+          <Text style={s.detailText}>📍 {r.address || `${parseFloat(r.latitude)?.toFixed(4)}, ${parseFloat(r.longitude)?.toFixed(4)}`}</Text>
           <Text style={s.detailText}>⚡ Prioritet: {PRIORITY_AZ[r.priority]}</Text>
           {r.sla_deadline && <Text style={s.detailText}>⏰ SLA: {new Date(r.sla_deadline).toLocaleString('az')}</Text>}
-          {r.status === 'resolved' && !r.rating && (
-            <View style={s.ratingBox}>
-              <Text style={s.ratingLabel}>Xidməti qiymətləndir:</Text>
-              <View style={s.stars}>
-                {[1,2,3,4,5].map(n => (
-                  <TouchableOpacity key={n} onPress={() => rate(r.id, n)}>
-                    <Text style={s.star}>⭐</Text>
+          {r.citizen_name && <Text style={s.detailText}>👤 {r.citizen_name}</Text>}
+
+          {admin ? (
+            <View style={s.adminBtns}>
+              <Text style={s.ratingLabel}>Status dəyiş:</Text>
+              <View style={s.statusRow}>
+                {[
+                  { s:'in_progress', label:'İcrada',      color:'#3B82F6' },
+                  { s:'resolved',    label:'Həll edildi',  color:'#10B981' },
+                  { s:'rejected',    label:'Rədd et',      color:'#EF4444' },
+                  { s:'pending',     label:'Gözləyir',     color:'#F59E0B' },
+                ].map(btn => (
+                  <TouchableOpacity key={btn.s} style={[s.statusBtn, { borderColor: btn.color }]} onPress={() => changeStatus(r.id, btn.s)}>
+                    <Text style={[s.statusBtnText, { color: btn.color }]}>{btn.label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
+          ) : (
+            <>
+              {r.status === 'resolved' && !r.rating && (
+                <View style={s.ratingBox}>
+                  <Text style={s.ratingLabel}>Xidməti qiymətləndir:</Text>
+                  <View style={s.stars}>
+                    {[1,2,3,4,5].map(n => (
+                      <TouchableOpacity key={n} onPress={() => rate(r.id, n)}>
+                        <Text style={s.star}>⭐</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              )}
+              {r.rating && <Text style={s.detailText}>⭐ Qiymətiniz: {'⭐'.repeat(r.rating)}</Text>}
+            </>
           )}
-          {r.rating && <Text style={s.detailText}>⭐ Qiymətiniz: {'⭐'.repeat(r.rating)}</Text>}
         </View>
       )}
     </TouchableOpacity>

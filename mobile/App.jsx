@@ -1,14 +1,9 @@
 import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
-import * as Notifications from 'expo-notifications';
 import { getToken, removeToken } from './src/lib/api';
 import LoginScreen    from './src/screens/LoginScreen';
 import NewReportScreen from './src/screens/NewReportScreen';
 import MyReportsScreen from './src/screens/MyReportsScreen';
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({ shouldShowAlert:true, shouldPlaySound:true, shouldSetBadge:true }),
-});
 
 export default function App() {
   const [user,   setUser]   = useState(null);
@@ -19,8 +14,10 @@ export default function App() {
     getToken().then(t => { if (t) setUser({ loaded: true }); setChecked(true); });
   }, []);
 
+  const isAdmin = user?.role === 'admin';
+
   if (!checked) return <View style={{ flex:1, backgroundColor:'#111827' }} />;
-  if (!user)    return <LoginScreen onLogin={setUser} />;
+  if (!user)    return <LoginScreen onLogin={(u) => setUser(u)} />;
 
   return (
     <View style={s.root}>
@@ -33,22 +30,30 @@ export default function App() {
       </View>
 
       <View style={s.content}>
-        {tab === 'new'     && <NewReportScreen onSuccess={() => setTab('my')} />}
-        {tab === 'my'      && <MyReportsScreen />}
+        {isAdmin ? (
+          <MyReportsScreen admin={true} />
+        ) : (
+          <>
+            {tab === 'new' && <NewReportScreen onSuccess={() => setTab('my')} />}
+            {tab === 'my'  && <MyReportsScreen />}
+          </>
+        )}
       </View>
 
-      <View style={s.tabBar}>
-        {[
-          { key:'new', icon:'✍️', label:'Yeni Müraciət' },
-          { key:'my',  icon:'📋', label:'Müraciətlərim' },
-        ].map(t => (
-          <TouchableOpacity key={t.key} style={s.tabItem} onPress={() => setTab(t.key)}>
-            <Text style={s.tabIcon}>{t.icon}</Text>
-            <Text style={[s.tabLabel, tab===t.key && s.tabActive]}>{t.label}</Text>
-            {tab===t.key && <View style={s.tabDot}/>}
-          </TouchableOpacity>
-        ))}
-      </View>
+      {!isAdmin && (
+        <View style={s.tabBar}>
+          {[
+            { key:'new', icon:'✍️', label:'Yeni Müraciət' },
+            { key:'my',  icon:'📋', label:'Müraciətlərim' },
+          ].map(t => (
+            <TouchableOpacity key={t.key} style={s.tabItem} onPress={() => setTab(t.key)}>
+              <Text style={s.tabIcon}>{t.icon}</Text>
+              <Text style={[s.tabLabel, tab===t.key && s.tabActive]}>{t.label}</Text>
+              {tab===t.key && <View style={s.tabDot}/>}
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
     </View>
   );
 }

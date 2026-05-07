@@ -33,12 +33,14 @@ export default function NewReportScreen({ onSuccess }) {
   };
 
   const pickPhoto = async () => {
-    const r = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7 });
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') { Alert.alert('İcazə lazımdır', 'Kamera icazəsi verin'); return; }
+    const r = await ImagePicker.launchCameraAsync({ quality: 0.7 });
     if (!r.canceled) setPhoto(r.assets[0]);
   };
 
   const pickFromGallery = async () => {
-    const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7 });
+    const r = await ImagePicker.launchImageLibraryAsync({ quality: 0.7 });
     if (!r.canceled) setPhoto(r.assets[0]);
   };
 
