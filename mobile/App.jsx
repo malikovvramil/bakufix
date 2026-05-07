@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
 import { getToken, removeToken } from './src/lib/api';
-import LoginScreen    from './src/screens/LoginScreen';
+import LoginScreen     from './src/screens/LoginScreen';
 import NewReportScreen from './src/screens/NewReportScreen';
 import MyReportsScreen from './src/screens/MyReportsScreen';
+import MapScreen       from './src/screens/MapScreen';
 
 export default function App() {
   const [user,   setUser]   = useState(null);
@@ -31,29 +32,37 @@ export default function App() {
 
       <View style={s.content}>
         {isAdmin ? (
-          <MyReportsScreen admin={true} />
+          <>
+            {tab === 'reports' && <MyReportsScreen admin={true} />}
+            {tab === 'map'     && <MapScreen />}
+          </>
         ) : (
           <>
-            {tab === 'new' && <NewReportScreen onSuccess={() => setTab('my')} />}
-            {tab === 'my'  && <MyReportsScreen />}
+            {tab === 'new'  && <NewReportScreen onSuccess={() => setTab('my')} />}
+            {tab === 'my'   && <MyReportsScreen />}
+            {tab === 'map'  && <MapScreen />}
           </>
         )}
       </View>
 
-      {!isAdmin && (
-        <View style={s.tabBar}>
-          {[
-            { key:'new', icon:'✍️', label:'Yeni Müraciət' },
-            { key:'my',  icon:'📋', label:'Müraciətlərim' },
-          ].map(t => (
-            <TouchableOpacity key={t.key} style={s.tabItem} onPress={() => setTab(t.key)}>
-              <Text style={s.tabIcon}>{t.icon}</Text>
-              <Text style={[s.tabLabel, tab===t.key && s.tabActive]}>{t.label}</Text>
-              {tab===t.key && <View style={s.tabDot}/>}
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+      <View style={s.tabBar}>
+        {(isAdmin ? [
+          { key:'reports', icon:'📋', label:'Müraciətlər' },
+          { key:'map',     icon:'🗺️', label:'Xəritə' },
+        ] : [
+          { key:'new', icon:'✍️', label:'Yeni Müraciət' },
+          { key:'my',  icon:'📋', label:'Müraciətlərim' },
+          { key:'map', icon:'🗺️', label:'Xəritə' },
+        ]).map(t => (
+          <TouchableOpacity key={t.key} style={s.tabItem}
+            onPress={() => setTab(t.key)}
+            initialRouteName={isAdmin ? 'reports' : 'new'}>
+            <Text style={s.tabIcon}>{t.icon}</Text>
+            <Text style={[s.tabLabel, tab===t.key && s.tabActive]}>{t.label}</Text>
+            {tab===t.key && <View style={s.tabDot}/>}
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
 }
