@@ -13,7 +13,9 @@
       "Bash(node --check controllers/auth.controller.js)",
       "Bash(node --check controllers/reports.controller.js)",
       "Bash(node --check routes/departments.routes.js)",
-      "Bash(node --check middleware/auth.js)"
+      "Bash(node --check middleware/auth.js)",
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:3000\" -UseBasicParsing -ErrorAction SilentlyContinue; Write-Output \"Status: $\\($r.StatusCode\\)\"; $r.Content | Select-String \"bg-\\\\[#111\\\\]|Cannot|error\" | Select-Object -First 3)",
+      "PowerShell(Start-Process -FilePath \"cmd.exe\" -ArgumentList \"/c cd /d `\"C:\\\\Users\\\\Student\\\\Documents\\\\Claude\\\\Projects\\\\Ramil-xakaton\\\\dashboard`\" && npm run dev > `\"C:\\\\Users\\\\Student\\\\AppData\\\\Local\\\\Temp\\\\next-dev.log`\" 2>&1\" -WindowStyle Hidden)"
     ]
   }
 }

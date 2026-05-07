@@ -51,7 +51,7 @@ export default function Map({ reports = [], height = '500px' }) {
       const color  = STATUS_COLORS[r.status] || '#888';
       const radius = PRIORITY_RADIUS[r.priority] || 10;
 
-      const marker = L.circleMarker([r.latitude, r.longitude], {
+      const marker = L.circleMarker([Number(r.latitude), Number(r.longitude)], {
         radius, fillColor: color, color: '#fff',
         weight: 2, opacity: 1, fillOpacity: 0.85,
       }).addTo(map);
