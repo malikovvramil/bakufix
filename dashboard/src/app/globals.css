@@ -1,9 +1,8 @@
-@import 'leaflet/dist/leaflet.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body { background: #f8f9fa; }
+body { margin: 0; }
 
 .status-pending     { @apply bg-yellow-100 text-yellow-800; }
 .status-in_progress { @apply bg-blue-100 text-blue-800; }

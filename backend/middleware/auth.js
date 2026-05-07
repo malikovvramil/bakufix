@@ -21,4 +21,17 @@ const role = (...roles) => (req, res, next) => {
   next();
 };
 
-module.exports = { auth, role };
+// Like auth but doesn't reject — sets req.user to null if no/invalid token
+const optionalAuth = (req, _res, next) => {
+  const header = req.headers.authorization;
+  if (header && header.startsWith('Bearer ')) {
+    try {
+      req.user = jwt.verify(header.split(' ')[1], process.env.JWT_SECRET);
+    } catch { req.user = null; }
+  } else {
+    req.user = null;
+  }
+  next();
+};
+
+module.exports = { auth, role, optionalAuth };

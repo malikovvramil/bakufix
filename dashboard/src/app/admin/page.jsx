@@ -193,10 +193,17 @@ export default function AdminPage() {
                 {selected.photo_url && <img src={selected.photo_url} alt="" className="w-full rounded-lg mb-4 object-cover" style={{height:160}} />}
                 <p className="text-sm text-gray-700 mb-3">{selected.description}</p>
                 <div className="space-y-1.5 text-xs text-gray-500 mb-4">
-                  <p>📍 {selected.address || `${selected.latitude?.toFixed(4)}, ${selected.longitude?.toFixed(4)}`}</p>
+                  <p>📍 {selected.address || (selected.latitude != null ? `${selected.latitude.toFixed(4)}, ${selected.longitude?.toFixed(4)}` : '—')}</p>
                   <p>🏢 {selected.department_name}</p>
                   <p>⏰ SLA: {selected.sla_deadline ? new Date(selected.sla_deadline).toLocaleString('az') : '—'}</p>
-                  {selected.ai_suggestion && <p>🤖 AI: {JSON.parse(selected.ai_suggestion||'{}').summary || '—'}</p>}
+                  {selected.ai_suggestion && (() => {
+                    try {
+                      const p = typeof selected.ai_suggestion === 'string'
+                        ? JSON.parse(selected.ai_suggestion)
+                        : selected.ai_suggestion;
+                      return <p>🤖 AI: {p?.summary || '—'}</p>;
+                    } catch { return null; }
+                  })()}
                 </div>
                 <div className="border-t pt-4">
                   <p className="text-xs font-medium text-gray-600 mb-2">Status dəyiş:</p>

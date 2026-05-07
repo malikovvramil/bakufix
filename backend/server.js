@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express    = require('express');
 const http       = require('http');
+const os         = require('os');
 const { Server } = require('socket.io');
 const cors       = require('cors');
 const fileUpload = require('express-fileupload');
@@ -28,7 +29,7 @@ app.use(cors({
 }));
 app.options('*', cors());
 app.use(express.json());
-app.use(fileUpload({ useTempFiles: true, tempFileDir: '/tmp/' }));
+app.use(fileUpload({ useTempFiles: true, tempFileDir: os.tmpdir() }));
 
 // Socket.io — req-ə əlavə et ki controller-lər istifadə edə bilsin
 app.use((req, _res, next) => { req.io = io; next(); });

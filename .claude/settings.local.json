@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx next *)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(curl *)",
+      "Bash(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
+      "Bash(Stop-Process -Force)",
+      "Bash(Write-Output \"killed\")",
+      "PowerShell(Get-Process *)",
+      "Bash(node -e ' *)",
+      "Bash(node --check server.js)",
+      "Bash(node --check controllers/auth.controller.js)",
+      "Bash(node --check controllers/reports.controller.js)",
+      "Bash(node --check routes/departments.routes.js)",
+      "Bash(node --check middleware/auth.js)"
+    ]
+  }
+}

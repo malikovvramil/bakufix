@@ -30,7 +30,7 @@ function mockAnalyze(text) {
         category:    rule.category,
         priority:    rule.priority,
         department:  DEPARTMENTS[rule.dept].name,
-        departmentId: rule.dept === 'yol' ? 1 : rule.dept === 'su' ? 2 : rule.dept === 'isiq' ? 3 : rule.dept === 'abadliq' ? 4 : 5,
+        departmentId: DEPARTMENTS[rule.dept].id,
         categoryId:  rule.catId,
         confidence:  'keyword_match',
         summary:     `${rule.category} problemi aşkarlandı.`,

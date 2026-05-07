@@ -48,7 +48,7 @@ async function checkWeatherAlerts(io) {
     ['forecast_alert', desc, severity, JSON.stringify(forecast), validUntil]
   );
 
-  if (io) io.to('admin').emit('weather_alert', { id: rows[0].id, desc, severity });
+  if (io && rows.length) io.to('admin').emit('weather_alert', { id: rows[0].id, desc, severity });
   await sendPushToStaff([...forecast.depts], `Preventiv Xəbərdarlıq`, desc);
   console.log(`🌧  Hava xəbərdarlığı: ${desc}`);
 }

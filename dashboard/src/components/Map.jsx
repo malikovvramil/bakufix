@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef } from 'react';
+import 'leaflet/dist/leaflet.css';
 
 const STATUS_COLORS = {
   pending:     '#F59E0B',

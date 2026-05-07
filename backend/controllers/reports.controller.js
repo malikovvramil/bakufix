@@ -85,7 +85,7 @@ exports.create = async (req, res) => {
     const { rows } = await pool.query(
       `INSERT INTO reports (description, photo_url, latitude, longitude, address, priority, category_id, department_id, user_id, sla_deadline, ai_suggestion, duplicate_of)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
-      [description, photoUrl, latitude, longitude, address, ai.priority, ai.categoryId, ai.departmentId, req.user.id, slaDeadline, JSON.stringify(ai), duplicateOf]
+      [description, photoUrl, latitude, longitude, address, ai.priority, ai.categoryId, ai.departmentId, req.user?.id || null, slaDeadline, JSON.stringify(ai), duplicateOf]
     );
 
     if (duplicateOf) {
@@ -113,7 +113,7 @@ exports.updateStatus = async (req, res) => {
     const { rows: old } = await pool.query('SELECT * FROM reports WHERE id=$1', [id]);
     if (!old.length) return res.status(404).json({ error: 'Müraciət tapılmadı' });
 
-    const resolvedAt = status === 'resolved' ? new Date() : null;
+    const resolvedAt = status === 'resolved' ? new Date() : old[0].resolved_at;
     const { rows } = await pool.query(
       `UPDATE reports SET status=$1, resolved_at=$2, assigned_to=$3 WHERE id=$4 RETURNING *`,
       [status, resolvedAt, req.user.id, id]
