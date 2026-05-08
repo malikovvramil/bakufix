@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
-import { getToken, removeToken } from './src/lib/api';
+import api, { getToken, removeToken } from './src/lib/api';
 import LoginScreen     from './src/screens/LoginScreen';
 import NewReportScreen from './src/screens/NewReportScreen';
 import MyReportsScreen from './src/screens/MyReportsScreen';
@@ -12,10 +12,28 @@ export default function App() {
   const [checked,setChecked]= useState(false);
 
   useEffect(() => {
-    getToken().then(t => { if (t) setUser({ loaded: true }); setChecked(true); });
+    (async () => {
+      const t = await getToken();
+      if (t) {
+        // Restore the full user (including role) so admin sees admin tabs after a restart.
+        try {
+          const r = await api.get('/auth/me');
+          setUser(r.data);
+        } catch {
+          await removeToken();
+          setUser(null);
+        }
+      }
+      setChecked(true);
+    })();
   }, []);
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'staff';
+
+  // Make sure admin/staff see a valid initial tab.
+  useEffect(() => {
+    if (isAdmin && tab === 'new') setTab('reports');
+  }, [isAdmin, tab]);
 
   if (!checked) return <View style={{ flex:1, backgroundColor:'#111827' }} />;
   if (!user)    return <LoginScreen onLogin={(u) => setUser(u)} />;
@@ -55,8 +73,7 @@ export default function App() {
           { key:'map', icon:'🗺️', label:'Xəritə' },
         ]).map(t => (
           <TouchableOpacity key={t.key} style={s.tabItem}
-            onPress={() => setTab(t.key)}
-            initialRouteName={isAdmin ? 'reports' : 'new'}>
+            onPress={() => setTab(t.key)}>
             <Text style={s.tabIcon}>{t.icon}</Text>
             <Text style={[s.tabLabel, tab===t.key && s.tabActive]}>{t.label}</Text>
             {tab===t.key && <View style={s.tabDot}/>}

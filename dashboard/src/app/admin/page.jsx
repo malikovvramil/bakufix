@@ -77,7 +77,8 @@ export default function AdminPage() {
   const login = async (e) => {
     e.preventDefault();
     try {
-      const r = await api.post('/auth/login', { phone: loginForm.identifier, email: loginForm.identifier, password: loginForm.password });
+      // Backend matches `WHERE phone=$1 OR email=$1`, so a single field is enough.
+      const r = await api.post('/auth/login', { phone: loginForm.identifier, password: loginForm.password });
       localStorage.setItem('token', r.data.token);
       setToken(r.data.token);
       loadData();

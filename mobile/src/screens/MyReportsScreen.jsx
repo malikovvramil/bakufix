@@ -92,7 +92,7 @@ export default function MyReportsScreen({ admin = false }) {
 
   return (
     <View style={s.container}>
-      <Text style={s.heading}>Müraciətlərim</Text>
+      <Text style={s.heading}>{admin ? 'Müraciətlər' : 'Müraciətlərim'}</Text>
       <FlatList data={reports} keyExtractor={r => r.id.toString()} renderItem={renderItem}
         contentContainerStyle={{ padding:16, paddingBottom:40 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} tintColor="#F5A623" />}

@@ -50,7 +50,9 @@ export default function NewReportScreen({ onSuccess }) {
     setLoading(true);
     try {
       const form = new FormData();
-      form.append('description', desc);
+      // Prepend the user-picked category so AI/operators see the citizen's intent.
+      const fullDesc = cat ? `[${cat.label}] ${desc}` : desc;
+      form.append('description', fullDesc);
       form.append('latitude',    location.latitude.toString());
       form.append('longitude',   location.longitude.toString());
       if (photo) form.append('photo', { uri: photo.uri, type: 'image/jpeg', name: 'report.jpg' });

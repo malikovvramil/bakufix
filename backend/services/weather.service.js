@@ -42,14 +42,18 @@ async function checkWeatherAlerts(io) {
   const severity = forecast.rain > 30 || forecast.snow > 10 ? 'high' : 'medium';
   const validUntil = new Date(Date.now() + 12 * 3600 * 1000);
 
+  // Set is not JSON-serializable — convert to array for both DB storage and push targeting.
+  const deptsArr   = [...forecast.depts];
+  const dataForDb  = { rain: forecast.rain, snow: forecast.snow, wind: forecast.wind, depts: deptsArr };
+
   const { rows } = await pool.query(
     `INSERT INTO weather_alerts (alert_type, description, severity, weather_data, valid_until)
      VALUES ($1,$2,$3,$4,$5) RETURNING id`,
-    ['forecast_alert', desc, severity, JSON.stringify(forecast), validUntil]
+    ['forecast_alert', desc, severity, JSON.stringify(dataForDb), validUntil]
   );
 
   if (io && rows.length) io.to('admin').emit('weather_alert', { id: rows[0].id, desc, severity });
-  await sendPushToStaff([...forecast.depts], `Preventiv Xəbərdarlıq`, desc);
+  await sendPushToStaff(deptsArr, `Preventiv Xəbərdarlıq`, desc);
   console.log(`🌧  Hava xəbərdarlığı: ${desc}`);
 }
 

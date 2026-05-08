@@ -9,7 +9,13 @@ import api from '@/lib/api';
 const Map = dynamic(() => import('@/components/Map'), { ssr: false });
 
 const STATUS_AZ  = { pending:'Gözləyir', in_progress:'İcrada', resolved:'Həll edildi', rejected:'Rədd edildi' };
-const PIE_COLORS = ['#F59E0B','#3B82F6','#10B981','#EF4444'];
+// Map by status name so colors stay correct even if a slice is filtered out (e.g. zero pending).
+const PIE_COLOR_BY_NAME = {
+  'Gözləyir':    '#F59E0B',
+  'İcrada':      '#3B82F6',
+  'Həll edildi': '#10B981',
+  'Rədd edildi': '#EF4444',
+};
 const TABS = [
   { key:'map',    icon:'🗺️',  label:'Xəritə'      },
   { key:'report', icon:'✍️',  label:'Müraciət et' },
@@ -281,7 +287,7 @@ export default function PublicPage() {
                     <Pie data={byStatus} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70}
                       label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       labelLine={{ stroke: '#333' }}>
-                      {byStatus.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
+                      {byStatus.map((s, i) => <Cell key={i} fill={PIE_COLOR_BY_NAME[s.name] || '#888'} />)}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
                   </PieChart>

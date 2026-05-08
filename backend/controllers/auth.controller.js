@@ -10,14 +10,17 @@ const sign = (user) => jwt.sign(
 
 exports.register = async (req, res) => {
   try {
-    const { name, phone, email, password, role = 'citizen', department_id } = req.body;
+    const { name, phone, email, password } = req.body;
     if (!name || !password || (!phone && !email)) return res.status(400).json({ error: 'Ad, şifrə və telefon/email tələb olunur' });
 
+    // Public registration is always 'citizen'. Staff/admin must be provisioned manually
+    // (e.g. via DB seed or a separate authenticated endpoint) — never trust req.body.role.
+    const role = 'citizen';
     const hash = await bcrypt.hash(password, 10);
     const { rows } = await pool.query(
       `INSERT INTO users (name, phone, email, password_hash, role, department_id)
        VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, role, department_id`,
-      [name, phone || null, email || null, hash, role, department_id || null]
+      [name, phone || null, email || null, hash, role, null]
     );
     res.status(201).json({ token: sign(rows[0]), user: rows[0] });
   } catch (e) {
