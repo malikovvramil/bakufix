@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
 import api, { getToken, removeToken } from './src/lib/api';
+import { C } from './src/lib/theme';
 import LoginScreen     from './src/screens/LoginScreen';
 import NewReportScreen from './src/screens/NewReportScreen';
 import MyReportsScreen from './src/screens/MyReportsScreen';
 import MapScreen       from './src/screens/MapScreen';
 
 export default function App() {
-  const [user,   setUser]   = useState(null);
-  const [tab,    setTab]    = useState('new');
-  const [checked,setChecked]= useState(false);
+  const [user,    setUser]    = useState(null);
+  const [tab,     setTab]     = useState('new');
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
     (async () => {
       const t = await getToken();
       if (t) {
-        // Restore the full user (including role) so admin sees admin tabs after a restart.
         try {
           const r = await api.get('/auth/me');
           setUser(r.data);
@@ -30,19 +30,35 @@ export default function App() {
 
   const isAdmin = user?.role === 'admin' || user?.role === 'staff';
 
-  // Make sure admin/staff see a valid initial tab.
   useEffect(() => {
     if (isAdmin && tab === 'new') setTab('reports');
   }, [isAdmin, tab]);
 
-  if (!checked) return <View style={{ flex:1, backgroundColor:'#111827' }} />;
+  if (!checked) return <View style={{ flex: 1, backgroundColor: C.bg }} />;
   if (!user)    return <LoginScreen onLogin={(u) => setUser(u)} />;
+
+  const TABS = isAdmin
+    ? [
+        { key: 'reports', icon: '📋', label: 'Müraciətlər' },
+        { key: 'map',     icon: '🗺️', label: 'Xəritə' },
+      ]
+    : [
+        { key: 'new', icon: '✍️', label: 'Müraciət et' },
+        { key: 'my',  icon: '📋', label: 'Mənimkilər' },
+        { key: 'map', icon: '🗺️', label: 'Xəritə' },
+      ];
 
   return (
     <View style={s.root}>
-      <StatusBar barStyle="light-content" backgroundColor="#111827" />
+      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
+
       <View style={s.header}>
-        <Text style={s.logo}>🏙️ BakıFix</Text>
+        <View style={s.brand}>
+          <View style={s.dot} />
+          <Text style={s.brandName}>BakıFix</Text>
+          <Text style={s.brandSlash}>/</Text>
+          <Text style={s.brandSub}>{isAdmin ? 'Admin' : 'Vətəndaş'}</Text>
+        </View>
         <TouchableOpacity onPress={() => { removeToken(); setUser(null); }}>
           <Text style={s.logout}>Çıxış</Text>
         </TouchableOpacity>
@@ -56,44 +72,52 @@ export default function App() {
           </>
         ) : (
           <>
-            {tab === 'new'  && <NewReportScreen onSuccess={() => setTab('my')} />}
-            {tab === 'my'   && <MyReportsScreen />}
-            {tab === 'map'  && <MapScreen />}
+            {tab === 'new' && <NewReportScreen onSuccess={() => setTab('my')} />}
+            {tab === 'my'  && <MyReportsScreen />}
+            {tab === 'map' && <MapScreen />}
           </>
         )}
       </View>
 
       <View style={s.tabBar}>
-        {(isAdmin ? [
-          { key:'reports', icon:'📋', label:'Müraciətlər' },
-          { key:'map',     icon:'🗺️', label:'Xəritə' },
-        ] : [
-          { key:'new', icon:'✍️', label:'Yeni Müraciət' },
-          { key:'my',  icon:'📋', label:'Müraciətlərim' },
-          { key:'map', icon:'🗺️', label:'Xəritə' },
-        ]).map(t => (
-          <TouchableOpacity key={t.key} style={s.tabItem}
-            onPress={() => setTab(t.key)}>
-            <Text style={s.tabIcon}>{t.icon}</Text>
-            <Text style={[s.tabLabel, tab===t.key && s.tabActive]}>{t.label}</Text>
-            {tab===t.key && <View style={s.tabDot}/>}
-          </TouchableOpacity>
-        ))}
+        {TABS.map(t => {
+          const active = tab === t.key;
+          return (
+            <TouchableOpacity key={t.key} style={s.tabItem} onPress={() => setTab(t.key)} activeOpacity={0.7}>
+              <Text style={[s.tabIcon, !active && s.tabIconDim]}>{t.icon}</Text>
+              <Text style={[s.tabLabel, active && s.tabLabelActive]}>{t.label}</Text>
+              <View style={[s.tabUnderline, active && s.tabUnderlineActive]} />
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  root:      { flex:1, backgroundColor:'#111827' },
-  header:    { flexDirection:'row', alignItems:'center', justifyContent:'space-between', padding:16, paddingTop:52, backgroundColor:'#1F2937', borderBottomWidth:1, borderBottomColor:'#374151' },
-  logo:      { fontSize:18, fontWeight:'700', color:'#fff' },
-  logout:    { color:'#9CA3AF', fontSize:14 },
-  content:   { flex:1 },
-  tabBar:    { flexDirection:'row', backgroundColor:'#1F2937', borderTopWidth:1, borderTopColor:'#374151', paddingBottom:24 },
-  tabItem:   { flex:1, alignItems:'center', paddingTop:10, paddingBottom:4 },
-  tabIcon:   { fontSize:22, marginBottom:3 },
-  tabLabel:  { color:'#6B7280', fontSize:11 },
-  tabActive: { color:'#F5A623', fontWeight:'600' },
-  tabDot:    { width:4, height:4, borderRadius:2, backgroundColor:'#F5A623', marginTop:4 },
+  root:           { flex: 1, backgroundColor: C.bg },
+  header:         {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingTop: 52, paddingBottom: 12,
+    backgroundColor: C.card, borderBottomWidth: 1, borderBottomColor: C.border,
+  },
+  brand:          { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  dot:            { width: 8, height: 8, borderRadius: 4, backgroundColor: C.accent },
+  brandName:      { color: '#fff', fontWeight: '600', fontSize: 14 },
+  brandSlash:     { color: C.textGhost, fontSize: 14, marginHorizontal: 2 },
+  brandSub:       { color: C.textDim, fontSize: 13 },
+  logout:         { color: C.textMuted, fontSize: 13 },
+  content:        { flex: 1 },
+  tabBar:         {
+    flexDirection: 'row', backgroundColor: C.card,
+    borderTopWidth: 1, borderTopColor: C.border, paddingBottom: 18,
+  },
+  tabItem:        { flex: 1, alignItems: 'center', paddingTop: 10 },
+  tabIcon:        { fontSize: 18, marginBottom: 3 },
+  tabIconDim:     { opacity: 0.55 },
+  tabLabel:       { color: C.textMuted, fontSize: 11, fontWeight: '500' },
+  tabLabelActive: { color: '#fff' },
+  tabUnderline:   { width: 22, height: 2, marginTop: 6, borderRadius: 1, backgroundColor: 'transparent' },
+  tabUnderlineActive: { backgroundColor: C.accent },
 });
